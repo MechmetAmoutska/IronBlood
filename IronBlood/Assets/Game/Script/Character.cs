@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 public class Character : MonoBehaviour
 {
-   private CharacterController _cc;
+    private CharacterController _cc;
     public float MoveSpeed = 5f;
     private Vector3 _movementVelocity;
     private PlayerInput _playerInput;
@@ -41,7 +41,7 @@ public class Character : MonoBehaviour
     //State Machine
     public enum CharacterState
     {
-        Normal,Attacking,Dead,BeingHit,Slide,Spawn
+        Normal, Attacking, Dead, BeingHit, Slide, Spawn
     }
     public CharacterState CurrentState;
     public float SpawnDuration = 2f;
@@ -78,5 +78,33 @@ public class Character : MonoBehaviour
     }
 
 
+    private void CalculatePlayerMovement()
+    {
+        if (_playerInput.MouseButtonDown && _cc.isGrounded)
+        {
+            SwitchStateTo(CharacterState.Attacking);
+            return;
+        }
+        else if (_playerInput.SpaceKeyDown && _cc.isGrounded)
+        {
+            SwitchStateTo(CharacterState.Slide);
+            return;
+        }
+
+
+        _movementVelocity.Set(_playerInput.HorizontalInput, 0f, _playerInput.VerticalInput);
+        _movementVelocity.Normalize();
+        _movementVelocity = Quaternion.Euler(0, -45f, 0) * _movementVelocity;
+
+        _animator.SetFloat("Speed", _movementVelocity.magnitude);
+
+        _movementVelocity *= MoveSpeed * Time.deltaTime;
+
+        if (_movementVelocity != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(_movementVelocity);
+
+        _animator.SetBool("AirBorne", !_cc.isGrounded);
+
+    }
 
 }
