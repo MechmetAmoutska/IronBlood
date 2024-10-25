@@ -107,4 +107,110 @@ public class Character : MonoBehaviour
 
     }
 
+    private void CalculateEnemyMovement()
+    {
+        if (Vector3.Distance(TargetPlayer.position,transform.position) >= _navMeshAgent.stoppingDistance)
+        {
+            _navMeshAgent.SetDestination(TargetPlayer.position);
+            _animator.SetFloat("Speed", 0.2f);
+        }
+        else
+        {
+            _navMeshAgent.SetDestination(transform.position);
+            _animator.SetFloat("Speed", 0f);
+
+            SwitchStateTo(CharacterState.Attacking);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+
+        switch(CurrentState)
+        {
+            case CharacterState.Normal:
+                if(IsPlayer)
+                    CalculatePlayerMovement();
+                else
+                    CalculateEnemyMovement();
+                break;
+
+            case CharacterState.Attacking:
+
+                if(IsPlayer)
+                {
+                    if(Time.time < attackStartTime + AttackSlideDuration)
+                    {
+                        float timePassed = Time.time - attackStartTime;
+                        float lerpTime = timePassed / AttackSlideDuration;
+                        _movementVelocity = Vector3.Lerp(transform.forward * AttackSlideSpeed, Vector3.zero, lerpTime);
+                    }
+
+                    if (_playerInput.MouseButtonDown && _cc.isGrounded)
+                    {
+                        string currentClipName = _animator.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+                        attackAnimationDuration = _animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+
+                        if(currentClipName != "LittleAdventurerAndie_ATTACK_03" && attackAnimationDuration > 0.5f && attackAnimationDuration < 0.7f)
+                        {
+                            _playerInput.MouseButtonDown = false;
+                            SwitchStateTo(CharacterState.Attacking);
+
+                            //CalculatePlayerMovement();
+                        }
+                    }
+                }
+
+                break;
+
+            case CharacterState.Dead:
+                return;
+
+            case CharacterState.BeingHit:
+
+
+                break;
+
+            case CharacterState.Slide:
+                _movementVelocity = transform.forward * SlideSpeed * Time.deltaTime;
+                break;
+
+            case CharacterState.Spawn:
+                currentSpawnTime -= Time.deltaTime;
+                if(currentSpawnTime <= 0)
+                {
+                    SwitchStateTo(CharacterState.Normal);
+                }
+                break;
+        }
+
+        if(impactOnCharacter.magnitude > 0.2f)
+        {
+            _movementVelocity = impactOnCharacter * Time.deltaTime;
+        }
+            impactOnCharacter = Vector3.Lerp(impactOnCharacter, Vector3.zero, Time.deltaTime * 5);
+
+        if (IsPlayer)
+        {
+            if(_cc.isGrounded == false)
+                _verticalVelocity= Gravity;
+            else
+                _verticalVelocity = Gravity * 0.3f;
+
+            _movementVelocity += _verticalVelocity * Vector3.up * Time.deltaTime;
+
+            _cc.Move(_movementVelocity);
+            _movementVelocity = Vector3.zero;
+        }
+        else
+        {
+            if (CurrentState != CharacterState.Normal)
+            {
+                _cc.Move(_movementVelocity);
+                _movementVelocity = Vector3.zero;
+            }
+        }
+    }
+
+
 }
