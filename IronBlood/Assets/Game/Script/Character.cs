@@ -212,5 +212,102 @@ public class Character : MonoBehaviour
         }
     }
 
+     public void SwitchStateTo(CharacterState newState)
+    {
+        if(IsPlayer)
+        {
+            _playerInput.ClearCache();
+        }
+        
+        
+        //Exiting State
+        switch (CurrentState)
+        {
+            case CharacterState.Normal:
+                break;
+            case CharacterState.Attacking:
+
+                if (_damageCaster != null)
+                    _damageCaster.DisableDamageCaster();
+
+                if(IsPlayer)
+                    GetComponent<PlayerVFXManager>().StopBlade();
+                break;
+            case CharacterState.Dead:
+                return;
+            case CharacterState.BeingHit:
+                break;
+            case CharacterState.Slide:
+                break;
+
+            case CharacterState.Spawn:
+                IsInvincible = false;
+                break;
+
+        }
+
+        //Entering State
+        switch (newState)
+        {
+            case CharacterState.Normal:
+                break;
+            case CharacterState.Attacking:
+
+                if (!IsPlayer)
+                {
+                    Quaternion newRotation = Quaternion.LookRotation(TargetPlayer.position - transform.position);
+                    transform.rotation = newRotation;
+                }
+                _animator.SetTrigger("Attack");
+
+                if (IsPlayer)
+                {
+                    attackStartTime = Time.time;
+                    RotateToCursor();
+                }
+                break;
+            
+            case CharacterState.Dead:
+                _cc.enabled = false;
+                _animator.SetTrigger("Dead");
+                StartCoroutine(MaterialDissolve());
+
+                if(!IsPlayer)
+                {
+                    SkinnedMeshRenderer mesh = GetComponentInChildren<SkinnedMeshRenderer>();
+                    mesh.gameObject.layer = 0;
+                }
+
+
+                break;
+            case CharacterState.BeingHit:
+                _animator.SetTrigger("BeingHit");
+
+                if(IsPlayer)
+                {
+                    IsInvincible = true;
+                    StartCoroutine(DelayCancelInvincible());
+                }
+                break;
+            case CharacterState.Slide:
+                _animator.SetTrigger("Slide");
+                break;
+
+            case CharacterState.Spawn:
+                IsInvincible = true;
+                currentSpawnTime = SpawnDuration;
+                StartCoroutine(MaterialAppear());
+                break;
+            
+        }
+
+        CurrentState = newState;
+
+        Debug.Log("Switch to " + CurrentState);
+
+
+    }
+
+
 
 }
