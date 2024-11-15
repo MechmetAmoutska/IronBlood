@@ -308,6 +308,58 @@ public class Character : MonoBehaviour
 
     }
 
+      public void SlideAnimationEnds()
+    {
+        SwitchStateTo(CharacterState.Normal);
+    }
+
+    public void AttackAnimationEnds()
+    {
+        SwitchStateTo(CharacterState.Normal);
+    }
+
+    public void BeingHitAnimationEnds()
+    {
+        SwitchStateTo(CharacterState.Normal);
+    }
+
+    public void ApplyDamage(int damage, Vector3 attackerPos = new Vector3())
+    {
+        if(IsInvincible)
+        {
+            return;
+        }
+        if(_health!=null)
+        {
+            _health.ApplyDamage(damage);
+        }
+
+        if(!IsPlayer)
+        {
+            GetComponent<EnemyVFXManager>().PlayBeingHitVFX(attackerPos);
+        }
+
+        StartCoroutine(MaterialBlink());
+
+        if(IsPlayer)
+        {
+            SwitchStateTo(CharacterState.BeingHit);
+            AddImpact(attackerPos, 10f);
+        }
+        else
+        {
+            AddImpact(attackerPos, 2.5f);
+        }
+    }
+
+     IEnumerator DelayCancelInvincible()
+    {
+        yield return new WaitForSeconds(invincibleDuration);
+        IsInvincible = false;
+    }
+
+
+
 
 
 }
