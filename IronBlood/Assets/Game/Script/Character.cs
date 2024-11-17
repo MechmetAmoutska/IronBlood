@@ -358,6 +358,14 @@ public class Character : MonoBehaviour
         IsInvincible = false;
     }
 
+        private void AddImpact(Vector3 attackerPos, float force)
+    {
+        Vector3 impactDir = transform.position - attackerPos;
+        impactDir.Normalize();
+        impactDir.y = 0;
+        impactOnCharacter = impactDir * force;
+    }
+
 
 
 
