@@ -109,7 +109,7 @@ public class Character : MonoBehaviour
 
     private void CalculateEnemyMovement()
     {
-        if (Vector3.Distance(TargetPlayer.position,transform.position) >= _navMeshAgent.stoppingDistance)
+        if (Vector3.Distance(TargetPlayer.position, transform.position) >= _navMeshAgent.stoppingDistance)
         {
             _navMeshAgent.SetDestination(TargetPlayer.position);
             _animator.SetFloat("Speed", 0.2f);
@@ -126,10 +126,10 @@ public class Character : MonoBehaviour
     private void FixedUpdate()
     {
 
-        switch(CurrentState)
+        switch (CurrentState)
         {
             case CharacterState.Normal:
-                if(IsPlayer)
+                if (IsPlayer)
                     CalculatePlayerMovement();
                 else
                     CalculateEnemyMovement();
@@ -137,9 +137,9 @@ public class Character : MonoBehaviour
 
             case CharacterState.Attacking:
 
-                if(IsPlayer)
+                if (IsPlayer)
                 {
-                    if(Time.time < attackStartTime + AttackSlideDuration)
+                    if (Time.time < attackStartTime + AttackSlideDuration)
                     {
                         float timePassed = Time.time - attackStartTime;
                         float lerpTime = timePassed / AttackSlideDuration;
@@ -151,7 +151,7 @@ public class Character : MonoBehaviour
                         string currentClipName = _animator.GetCurrentAnimatorClipInfo(0)[0].clip.name;
                         attackAnimationDuration = _animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
 
-                        if(currentClipName != "LittleAdventurerAndie_ATTACK_03" && attackAnimationDuration > 0.5f && attackAnimationDuration < 0.7f)
+                        if (currentClipName != "LittleAdventurerAndie_ATTACK_03" && attackAnimationDuration > 0.5f && attackAnimationDuration < 0.7f)
                         {
                             _playerInput.MouseButtonDown = false;
                             SwitchStateTo(CharacterState.Attacking);
@@ -177,23 +177,23 @@ public class Character : MonoBehaviour
 
             case CharacterState.Spawn:
                 currentSpawnTime -= Time.deltaTime;
-                if(currentSpawnTime <= 0)
+                if (currentSpawnTime <= 0)
                 {
                     SwitchStateTo(CharacterState.Normal);
                 }
                 break;
         }
 
-        if(impactOnCharacter.magnitude > 0.2f)
+        if (impactOnCharacter.magnitude > 0.2f)
         {
             _movementVelocity = impactOnCharacter * Time.deltaTime;
         }
-            impactOnCharacter = Vector3.Lerp(impactOnCharacter, Vector3.zero, Time.deltaTime * 5);
+        impactOnCharacter = Vector3.Lerp(impactOnCharacter, Vector3.zero, Time.deltaTime * 5);
 
         if (IsPlayer)
         {
-            if(_cc.isGrounded == false)
-                _verticalVelocity= Gravity;
+            if (_cc.isGrounded == false)
+                _verticalVelocity = Gravity;
             else
                 _verticalVelocity = Gravity * 0.3f;
 
@@ -212,14 +212,14 @@ public class Character : MonoBehaviour
         }
     }
 
-     public void SwitchStateTo(CharacterState newState)
+    public void SwitchStateTo(CharacterState newState)
     {
-        if(IsPlayer)
+        if (IsPlayer)
         {
             _playerInput.ClearCache();
         }
-        
-        
+
+
         //Exiting State
         switch (CurrentState)
         {
@@ -230,7 +230,7 @@ public class Character : MonoBehaviour
                 if (_damageCaster != null)
                     _damageCaster.DisableDamageCaster();
 
-                if(IsPlayer)
+                if (IsPlayer)
                     GetComponent<PlayerVFXManager>().StopBlade();
                 break;
             case CharacterState.Dead:
@@ -266,13 +266,13 @@ public class Character : MonoBehaviour
                     RotateToCursor();
                 }
                 break;
-            
+
             case CharacterState.Dead:
                 _cc.enabled = false;
                 _animator.SetTrigger("Dead");
                 StartCoroutine(MaterialDissolve());
 
-                if(!IsPlayer)
+                if (!IsPlayer)
                 {
                     SkinnedMeshRenderer mesh = GetComponentInChildren<SkinnedMeshRenderer>();
                     mesh.gameObject.layer = 0;
@@ -283,7 +283,7 @@ public class Character : MonoBehaviour
             case CharacterState.BeingHit:
                 _animator.SetTrigger("BeingHit");
 
-                if(IsPlayer)
+                if (IsPlayer)
                 {
                     IsInvincible = true;
                     StartCoroutine(DelayCancelInvincible());
@@ -298,7 +298,7 @@ public class Character : MonoBehaviour
                 currentSpawnTime = SpawnDuration;
                 StartCoroutine(MaterialAppear());
                 break;
-            
+
         }
 
         CurrentState = newState;
@@ -308,7 +308,7 @@ public class Character : MonoBehaviour
 
     }
 
-      public void SlideAnimationEnds()
+    public void SlideAnimationEnds()
     {
         SwitchStateTo(CharacterState.Normal);
     }
@@ -325,23 +325,23 @@ public class Character : MonoBehaviour
 
     public void ApplyDamage(int damage, Vector3 attackerPos = new Vector3())
     {
-        if(IsInvincible)
+        if (IsInvincible)
         {
             return;
         }
-        if(_health!=null)
+        if (_health != null)
         {
             _health.ApplyDamage(damage);
         }
 
-        if(!IsPlayer)
+        if (!IsPlayer)
         {
             GetComponent<EnemyVFXManager>().PlayBeingHitVFX(attackerPos);
         }
 
         StartCoroutine(MaterialBlink());
 
-        if(IsPlayer)
+        if (IsPlayer)
         {
             SwitchStateTo(CharacterState.BeingHit);
             AddImpact(attackerPos, 10f);
@@ -352,18 +352,38 @@ public class Character : MonoBehaviour
         }
     }
 
-     IEnumerator DelayCancelInvincible()
+    IEnumerator DelayCancelInvincible()
     {
         yield return new WaitForSeconds(invincibleDuration);
         IsInvincible = false;
     }
 
-        private void AddImpact(Vector3 attackerPos, float force)
+    private void AddImpact(Vector3 attackerPos, float force)
     {
         Vector3 impactDir = transform.position - attackerPos;
         impactDir.Normalize();
         impactDir.y = 0;
         impactOnCharacter = impactDir * force;
+    }
+
+    public void EnableDamageCaster()
+    {
+        _damageCaster.EnableDamageCaster();
+    }
+
+    public void DisableDamageCaster()
+    {
+        _damageCaster.DisableDamageCaster();
+    }
+
+    IEnumerator MaterialBlink()
+    {
+        _materialPropertyBlock.SetFloat("_blink", 0.4f);
+        _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
+
+        yield return new WaitForSeconds(0.2f);
+        _materialPropertyBlock.SetFloat("_blink", 0f);
+        _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
     }
 
 
