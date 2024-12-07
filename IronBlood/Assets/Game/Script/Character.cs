@@ -411,6 +411,29 @@ public class Character : MonoBehaviour
         DropItem();
     }
 
+    
+    public void DropItem()
+    {
+        if (ItemToDrop != null)
+        {
+            Instantiate(ItemToDrop,transform.position,Quaternion.identity);
+        }
+    }
+
+    public void PickUpItem(PickUp item)
+    {
+        switch(item.Type)
+        {
+            case PickUp.PickUpType.Heal:
+                AddHealth(item.Value);
+                break;
+            case PickUp.PickUpType.Coin:
+                AddCoin(item.Value);
+                break;
+        }
+    }
+
+
 
 
 
