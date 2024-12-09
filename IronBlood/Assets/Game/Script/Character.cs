@@ -386,7 +386,7 @@ public class Character : MonoBehaviour
         _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
     }
 
-     IEnumerator MaterialDissolve()
+    IEnumerator MaterialDissolve()
     {
         yield return new WaitForSeconds(2);
 
@@ -411,18 +411,18 @@ public class Character : MonoBehaviour
         DropItem();
     }
 
-    
+
     public void DropItem()
     {
         if (ItemToDrop != null)
         {
-            Instantiate(ItemToDrop,transform.position,Quaternion.identity);
+            Instantiate(ItemToDrop, transform.position, Quaternion.identity);
         }
     }
 
     public void PickUpItem(PickUp item)
     {
-        switch(item.Type)
+        switch (item.Type)
         {
             case PickUp.PickUpType.Heal:
                 AddHealth(item.Value);
@@ -431,6 +431,17 @@ public class Character : MonoBehaviour
                 AddCoin(item.Value);
                 break;
         }
+    }
+
+
+    private void AddHealth(int health)
+    {
+        _health.AddHealth(health);
+    }
+
+    private void AddCoin(int coin)
+    {
+        Coin += coin;
     }
 
 
