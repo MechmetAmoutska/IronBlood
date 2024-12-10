@@ -444,4 +444,38 @@ public class Character : MonoBehaviour
         Coin += coin;
     }
 
+     public void RotateToTarget()
+    {
+        if (CurrentState != CharacterState.Dead)
+        {
+            transform.LookAt(TargetPlayer, Vector3.up);
+        }
+    }
+
+    IEnumerator MaterialAppear()
+    {
+        float dissolveTimeDuration = SpawnDuration;
+        float currentDissolveTime = 0;
+        float dissolveHight_start = -10f;
+        float dissolveHight_target = 20f;
+        float dissolveHight;
+
+        _materialPropertyBlock.SetFloat("_enableDissolve", 1f);
+        _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
+
+        while (currentDissolveTime < dissolveTimeDuration)
+        {
+            currentDissolveTime += Time.deltaTime;
+            dissolveHight = Mathf.Lerp(dissolveHight_start, dissolveHight_target, currentDissolveTime / dissolveTimeDuration);
+            _materialPropertyBlock.SetFloat("_dissolve_height", dissolveHight);
+            _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
+            yield return null;
+        }
+
+        _materialPropertyBlock.SetFloat("_enableDissolve", 0f);
+        _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
+    }
+
+
+
 }
