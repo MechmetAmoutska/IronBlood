@@ -444,9 +444,4 @@ public class Character : MonoBehaviour
         Coin += coin;
     }
 
-
-
-
-
-
 }
