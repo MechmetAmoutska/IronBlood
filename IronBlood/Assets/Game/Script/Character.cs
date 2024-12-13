@@ -444,7 +444,7 @@ public class Character : MonoBehaviour
         Coin += coin;
     }
 
-     public void RotateToTarget()
+    public void RotateToTarget()
     {
         if (CurrentState != CharacterState.Dead)
         {
@@ -474,6 +474,31 @@ public class Character : MonoBehaviour
 
         _materialPropertyBlock.SetFloat("_enableDissolve", 0f);
         _skinnedMeshRenderer.SetPropertyBlock(_materialPropertyBlock);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hitResult;
+
+        if (Physics.Raycast(ray, out hitResult, 1000, 1 << LayerMask.NameToLayer("CursorTest")))
+        {
+            Vector3 cursorPos = hitResult.point;
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(cursorPos, 1);
+        }
+    }
+
+    private void RotateToCursor()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hitResult;
+
+        if (Physics.Raycast(ray, out hitResult, 1000, 1 << LayerMask.NameToLayer("CursorTest")))
+        {
+            Vector3 cursorPos = hitResult.point;
+            transform.rotation = Quaternion.LookRotation(cursorPos - transform.position, Vector3.up);
+        }
     }
 
 
